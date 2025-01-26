@@ -1,33 +1,9 @@
-import Image from "next/image";
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      
-      <div>landing page
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-
-{/*
-
-      dans mon application LMS next js 15 utilisant types script et tailwind
-
-//@/lib/prisma/ts
-import { PrismaClient } from '@prisma/client';
-
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ['query', 'info', 'warn', 'error'],
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-export default prisma;
-
-
-shema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -115,23 +91,78 @@ model Enrollment {
   progress      Progress[]   @relation("EnrollmentProgress")
 }
 
-je veux créer un tuto.
-écris les scripts de :
-@/lib/prisma.ts
-@/utils/tuto/tutoService.ts
-@/app/author/tuto/pages.tsx
-@/app/author/tuto/[id]/pages.tsx
-@/app/api/tuto/route.ts
-@/app/api/tuto/[id]/route.ts
-@/components/tuto/TutoForm.tsx
-@/components/tuto/TutoList.tsx
-
- */}
-
-
-
-      </div>
-      
-          </div>
-  );
+model Progress {
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  user          User         @relation(fields: [userId], references: [id])
+  chapterId     Int
+  chapter       Chapter      @relation(fields: [chapterId], references: [id])
+  enrollmentId  Int
+  enrollment    Enrollment   @relation("EnrollmentProgress", fields: [enrollmentId], references: [id])
+  completed     Boolean      @default(false)
+  completedAt   DateTime?
 }
+
+enum Role {
+  STUDENT
+  AUTHOR
+  TRAINER
+  ADMIN
+}
+
+enum ParagraphType {
+  TEXT
+  IMAGE
+  CODE
+}
+
+// Modèles pour les sessions de formation
+model Session {
+  id              Int          @id @default(autoincrement())
+  UserId          Int
+  trainer         User         @relation(fields: [UserId], references: [id], name: "TrainerSessions")
+  participants    Participant[] @relation("ParticipatedSessions")
+  startDate       DateTime
+  endDate         DateTime
+  trainingDates   DateTime[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Training {
+  id              Int          @id @default(autoincrement())
+  title           String       @db.VarChar(255) 
+  ref             String       @db.VarChar(255)
+  description     String       @db.VarChar(500) 
+  prerequis       String       @db.VarChar(500) 
+  technologyId    Int
+  technology      Technology   @relation(fields: [technologyId], references: [id]) 
+  organizerId     Int
+  organizer       Center       @relation(fields: [organizerId], references: [id])
+  author          String
+  durationDays    Int
+  durationHours   Int
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Center {
+  id            Int          @id @default(autoincrement())
+  name          String       @db.VarChar(255)
+  trainings     Training[]   
+}
+
+model Participant {
+  id            Int          @id @default(autoincrement())
+  firstname     String       @db.VarChar(255)
+  lastname      String       @db.VarChar(255)
+  sessions      Session[]    @relation("ParticipatedSessions")
+}
+
+model Technology {
+  id            Int          @id @default(autoincrement())
+  name          String       @db.VarChar(255)
+  trainings     Training[]   // Relation inverse avec Training
+}
+
+
