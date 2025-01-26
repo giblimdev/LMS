@@ -5,164 +5,164 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client-js" // Génère le client Prisma pour JavaScript/TypeScript
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql" // Utilise PostgreSQL comme base de données
+  url      = env("DATABASE_URL") // URL de la base de données définie dans les variables d'environnement
 }
 
 // Modèles pour les tutos
+
 model User {
-  id            Int          @id @default(autoincrement())
-  name          String?      @db.VarChar(255)
-  email         String       @unique @db.VarChar(255)
-  password      String       @db.VarChar(255)
-  role          Role         @default(STUDENT)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  enrollments   Enrollment[]
-  tutos         Tuto[]
-  progresses    Progress[]
-  sessions      Session[]    @relation("TrainerSessions")
+  id            Int          @id @default(autoincrement()) // Identifiant unique de l'utilisateur
+  name          String?      @db.VarChar(255) // Nom de l'utilisateur (optionnel)
+  email         String       @unique @db.VarChar(255) // Email unique de l'utilisateur
+  password      String       @db.VarChar(255) // Mot de passe de l'utilisateur
+  role          Role         @default(STUDENT) // Rôle de l'utilisateur (par défaut STUDENT)
+  createdAt     DateTime     @default(now()) // Date de création de l'utilisateur
+  updatedAt     DateTime     @updatedAt // Date de dernière mise à jour de l'utilisateur
+  enrollments   Enrollment[] // Liste des inscriptions de l'utilisateur
+  tutos         Tuto[]       // Liste des tutos créés par l'utilisateur (s'il est auteur)
+  progresses    Progress[]   // Progrès de l'utilisateur dans les chapitres
+  sessions      Session[]    @relation("TrainerSessions") // Sessions de formation où l'utilisateur est formateur
 }
 
 model Tuto {
-  id            Int          @id @default(autoincrement())
-  title         String       @db.VarChar(255)
-  description   String?      @db.VarChar(500)
-  slug          String?       @unique @db.VarChar(255)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  authorId      Int
-  author        User         @relation(fields: [authorId], references: [id])
-  chapters      Chapter[]
-  enrollments   Enrollment[]
+  id            Int          @id @default(autoincrement()) // Identifiant unique du tuto
+  title         String       @db.VarChar(255) // Titre du tuto
+  description   String?      @db.VarChar(500) // Description du tuto (optionnelle)
+  slug          String?      @unique @db.VarChar(255) // Slug unique pour l'URL du tuto (optionnel)
+  createdAt     DateTime     @default(now()) // Date de création du tuto
+  updatedAt     DateTime     @updatedAt // Date de dernière mise à jour du tuto
+  authorId      Int          // Identifiant de l'auteur du tuto
+  author        User         @relation(fields: [authorId], references: [id]) // Relation avec l'auteur du tuto
+  chapters      Chapter[]    // Liste des chapitres du tuto
+  enrollments   Enrollment[] // Liste des inscriptions au tuto
 
-  @@index([slug])
+  @@index([slug]) // Index sur le champ slug pour des recherches plus rapides
 }
 
 model Chapter {
-  id            Int          @id @default(autoincrement())
-  title         String       @db.VarChar(255)
-  objective     String?      @db.VarChar(500)
-  order         Int
-  tutoId        Int
-  tuto          Tuto         @relation(fields: [tutoId], references: [id], onDelete: Cascade)
-  sections      Section[]
-  progresses    Progress[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id            Int          @id @default(autoincrement()) // Identifiant unique du chapitre
+  title         String       @db.VarChar(255) // Titre du chapitre
+  objective     String?      @db.VarChar(500) // Objectif du chapitre (optionnel)
+  order         Int          // Ordre du chapitre dans le tuto
+  tutoId        Int          // Identifiant du tuto auquel le chapitre appartient
+  tuto          Tuto         @relation(fields: [tutoId], references: [id], onDelete: Cascade) // Relation avec le tuto
+  sections      Section[]    // Liste des sections du chapitre
+  progresses    Progress[]   // Progrès des utilisateurs dans ce chapitre
+  createdAt     DateTime     @default(now()) // Date de création du chapitre
+  updatedAt     DateTime     @updatedAt // Date de dernière mise à jour du chapitre
 
-  @@index([order])
+  @@index([order]) // Index sur le champ order pour des recherches plus rapides
 }
 
 model Section {
-  id            Int          @id @default(autoincrement())
-  title         String       @db.VarChar(255)
-  order         Int
-  chapterId     Int
-  chapter       Chapter      @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  paragraphs    Paragraph[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id            Int          @id @default(autoincrement()) // Identifiant unique de la section
+  title         String       @db.VarChar(255) // Titre de la section
+  order         Int          // Ordre de la section dans le chapitre
+  chapterId     Int          // Identifiant du chapitre auquel la section appartient
+  chapter       Chapter      @relation(fields: [chapterId], references: [id], onDelete: Cascade) // Relation avec le chapitre
+  paragraphs    Paragraph[]  // Liste des paragraphes de la section
+  createdAt     DateTime     @default(now()) // Date de création de la section
+  updatedAt     DateTime     @updatedAt // Date de dernière mise à jour de la section
 
-  @@index([order])
+  @@index([order]) // Index sur le champ order pour des recherches plus rapides
 }
 
 model Paragraph {
-  id            Int          @id @default(autoincrement())
-  type          ParagraphType
-  content       String       @db.VarChar(1000)
-  sectionId     Int
-  section       Section      @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id            Int          @id @default(autoincrement()) // Identifiant unique du paragraphe
+  type          ParagraphType // Type de paragraphe (TEXT, IMAGE, CODE)
+  content       String       @db.VarChar(1000) // Contenu du paragraphe
+  sectionId     Int          // Identifiant de la section à laquelle le paragraphe appartient
+  section       Section      @relation(fields: [sectionId], references: [id], onDelete: Cascade) // Relation avec la section
+  createdAt     DateTime     @default(now()) // Date de création du paragraphe
+  updatedAt     DateTime     @updatedAt // Date de dernière mise à jour du paragraphe
 }
 
 model Enrollment {
-  id            Int          @id @default(autoincrement())
-  userId        Int
-  user          User         @relation(fields: [userId], references: [id])
-  tutoId        Int
-  tuto          Tuto         @relation(fields: [tutoId], references: [id])
-  enrolledAt    DateTime     @default(now())
-  progress      Progress[]   @relation("EnrollmentProgress")
+  id            Int          @id @default(autoincrement()) // Identifiant unique de l'inscription
+  userId        Int          // Identifiant de l'utilisateur inscrit
+  user          User         @relation(fields: [userId], references: [id]) // Relation avec l'utilisateur
+  tutoId        Int          // Identifiant du tuto auquel l'utilisateur est inscrit
+  tuto          Tuto         @relation(fields: [tutoId], references: [id]) // Relation avec le tuto
+  enrolledAt    DateTime     @default(now()) // Date d'inscription
+  progress      Progress[]   @relation("EnrollmentProgress") // Progrès de l'utilisateur dans ce tuto
 }
 
 model Progress {
-  id            Int          @id @default(autoincrement())
-  userId        Int
-  user          User         @relation(fields: [userId], references: [id])
-  chapterId     Int
-  chapter       Chapter      @relation(fields: [chapterId], references: [id])
-  enrollmentId  Int
-  enrollment    Enrollment   @relation("EnrollmentProgress", fields: [enrollmentId], references: [id])
-  completed     Boolean      @default(false)
-  completedAt   DateTime?
+  id            Int          @id @default(autoincrement()) // Identifiant unique du progrès
+  userId        Int          // Identifiant de l'utilisateur
+  user          User         @relation(fields: [userId], references: [id]) // Relation avec l'utilisateur
+  chapterId     Int          // Identifiant du chapitre
+  chapter       Chapter      @relation(fields: [chapterId], references: [id]) // Relation avec le chapitre
+  enrollmentId  Int          // Identifiant de l'inscription
+  enrollment    Enrollment   @relation("EnrollmentProgress", fields: [enrollmentId], references: [id]) // Relation avec l'inscription
+  completed     Boolean      @default(false) // Indique si le chapitre est terminé
+  completedAt   DateTime?    // Date de complétion du chapitre (optionnelle)
 }
 
 enum Role {
-  STUDENT
-  AUTHOR
-  TRAINER
-  ADMIN
+  STUDENT // Rôle étudiant
+  AUTHOR  // Rôle auteur
+  TRAINER // Rôle formateur
+  ADMIN   // Rôle administrateur
 }
 
 enum ParagraphType {
-  TEXT
-  IMAGE
-  CODE
+  TEXT  // Paragraphe de type texte
+  IMAGE // Paragraphe de type image
+  CODE  // Paragraphe de type code
 }
 
 // Modèles pour les sessions de formation
+
 model Session {
-  id              Int          @id @default(autoincrement())
-  UserId          Int
-  trainer         User         @relation(fields: [UserId], references: [id], name: "TrainerSessions")
-  participants    Participant[] @relation("ParticipatedSessions")
-  startDate       DateTime
-  endDate         DateTime
-  trainingDates   DateTime[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id              Int          @id @default(autoincrement()) // Identifiant unique de la session
+  UserId          Int          // Identifiant du formateur
+  trainer         User         @relation(fields: [UserId], references: [id], name: "TrainerSessions") // Relation avec le formateur
+  participants    Participant[] @relation("ParticipatedSessions") // Liste des participants à la session
+  startDate       DateTime     // Date de début de la session
+  endDate         DateTime     // Date de fin de la session
+  trainingDates   DateTime[]   // Dates des formations
+  createdAt       DateTime     @default(now()) // Date de création de la session
+  updatedAt       DateTime     @updatedAt // Date de dernière mise à jour de la session
 }
 
 model Training {
-  id              Int          @id @default(autoincrement())
-  title           String       @db.VarChar(255) 
-  ref             String       @db.VarChar(255)
-  description     String       @db.VarChar(500) 
-  prerequis       String       @db.VarChar(500) 
-  technologyId    Int
-  technology      Technology   @relation(fields: [technologyId], references: [id]) 
-  organizerId     Int
-  organizer       Center       @relation(fields: [organizerId], references: [id])
-  author          String
-  durationDays    Int
-  durationHours   Int
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id              Int          @id @default(autoincrement()) // Identifiant unique de la formation
+  title           String       @db.VarChar(255) // Titre de la formation
+  ref             String       @db.VarChar(255) // Référence de la formation
+  description     String       @db.VarChar(500) // Description de la formation
+  prerequis       String       @db.VarChar(500) // Prérequis de la formation
+  technologyId    Int          // Identifiant de la technologie associée
+  technology      Technology   @relation(fields: [technologyId], references: [id]) // Relation avec la technologie
+  organizerId     Int          // Identifiant de l'organisateur (centre de formation)
+  organizer       Center       @relation(fields: [organizerId], references: [id]) // Relation avec le centre de formation
+  author          String       // Auteur de la formation
+  durationDays    Int          // Durée de la formation en jours
+  durationHours   Int          // Durée de la formation en heures
+  createdAt       DateTime     @default(now()) // Date de création de la formation
+  updatedAt       DateTime     @updatedAt // Date de dernière mise à jour de la formation
 }
 
 model Center {
-  id            Int          @id @default(autoincrement())
-  name          String       @db.VarChar(255)
-  trainings     Training[]   
+  id            Int          @id @default(autoincrement()) // Identifiant unique du centre de formation
+  name          String       @db.VarChar(255) // Nom du centre de formation
+  trainings     Training[]   // Liste des formations organisées par ce centre
 }
 
 model Participant {
-  id            Int          @id @default(autoincrement())
-  firstname     String       @db.VarChar(255)
-  lastname      String       @db.VarChar(255)
-  sessions      Session[]    @relation("ParticipatedSessions")
+  id            Int          @id @default(autoincrement()) // Identifiant unique du participant
+  firstname     String       @db.VarChar(255) // Prénom du participant
+  lastname      String       @db.VarChar(255) // Nom de famille du participant
+  sessions      Session[]    @relation("ParticipatedSessions") // Liste des sessions auxquelles le participant est inscrit
 }
 
 model Technology {
-  id            Int          @id @default(autoincrement())
-  name          String       @db.VarChar(255)
-  trainings     Training[]   // Relation inverse avec Training
+  id            Int          @id @default(autoincrement()) // Identifiant unique de la technologie
+  name          String       @db.VarChar(255) // Nom de la technologie
+  trainings     Training[]   // Liste des formations associées à cette technologie
 }
-
-
